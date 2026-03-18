@@ -1,4 +1,4 @@
-package com.hycorp.inventorySistem.dto;
+package com.hycorp.inventorySystem.dto;
 
 import java.math.BigDecimal;
 

@@ -1,4 +1,4 @@
-package com.hycorp.inventorySistem;
+package com.hycorp.inventorySystem;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

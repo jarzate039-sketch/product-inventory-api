@@ -1,4 +1,4 @@
-package com.HYCorp.inventorySistem;
+package com.hycorp.inventorySystem;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
