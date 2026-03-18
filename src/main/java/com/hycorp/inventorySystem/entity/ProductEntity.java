@@ -1,4 +1,4 @@
-package com.hycorp.inventorySistem.entity;
+package com.hycorp.inventorySystem.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
