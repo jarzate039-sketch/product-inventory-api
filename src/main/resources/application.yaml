@@ -1,6 +1,15 @@
 spring:
   application:
-    name: inventorySistem
+    name: inventorySystem
+  datasource:
+    url: jdbc:h2:mem:inventorydb
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  h2:
+    console:
+      enabled: true
 
 server:
   port: 8080

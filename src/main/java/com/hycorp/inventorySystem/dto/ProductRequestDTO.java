@@ -22,14 +22,15 @@ public class ProductRequestDTO {
     @NotNull
     private String name;
     @Schema(description = "Category of the product")
+    @NotNull
     private String category;
     @Schema(description = "Price in decimal")
     @Positive
-    @NotBlank
+    @NotNull
     private BigDecimal price;
     @Schema(description = "Stock available")
     @Positive
-    @NotBlank
+    @NotNull
     private Integer stock;
     @Schema(description = "Actual Status of product")
     private String status;
