@@ -1,0 +1,10 @@
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/InventorySistemApplication.java
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/config/ModelMapperConfig.java
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/constants/StatusEnum.java
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/controller/ProductController.java
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/dto/ProductRequestDTO.java
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/dto/ProductResponseDTO.java
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/entity/ProductEntity.java
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/repository/ProductRepository.java
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/service/ProductService.java
+/Users/jesusmkx/Git/product-inventory-api/src/main/java/com/hycorp/inventorySystem/service/impl/ProductServiceImpl.java
