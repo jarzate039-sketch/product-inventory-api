@@ -2,6 +2,7 @@ package com.hycorp.inventorySystem.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import lombok.Setter;
 public class ProductResponseDTO {
 
     @Schema(description = "auto generate UUID")
-    private long id;
+    private UUID id;
     @Schema(description = "Name of the product")
     private String name;
     @Schema(description = "Category of the product")
