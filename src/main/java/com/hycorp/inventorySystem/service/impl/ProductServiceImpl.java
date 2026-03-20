@@ -10,8 +10,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.hycorp.inventorySystem.constants.StatusEnum;
+import com.hycorp.inventorySystem.constants.StockOperationEnum;
 import com.hycorp.inventorySystem.dto.ProductRequestDTO;
 import com.hycorp.inventorySystem.dto.ProductResponseDTO;
+import com.hycorp.inventorySystem.dto.StockRequestDTO;
+import com.hycorp.inventorySystem.dto.StockResponseDTO;
 import com.hycorp.inventorySystem.entity.ProductEntity;
 import com.hycorp.inventorySystem.repository.ProductRepository;
 import com.hycorp.inventorySystem.service.ProductService;
@@ -90,6 +93,43 @@ public class ProductServiceImpl implements ProductService{
     public Page<ProductResponseDTO> findByLowStock(Integer stock, Pageable pageable) {
         return repository.findByStockLessThan(stock, pageable)
             .map(product -> modelMapper.map(product, ProductResponseDTO.class));
+    }
+
+    @Override
+    @Transactional
+    public StockResponseDTO updateStock(UUID id, StockRequestDTO stockDTO) {
+        ProductEntity entity = findProductOrThrow(id);
+
+        if(entity.getStatus() == StatusEnum.DISCONTINUED){
+            throw new RuntimeException("Cannot update a discontinued product");
+        }
+        if (stockDTO.getOperation() == StockOperationEnum.SUBSTRACT && entity.getStock() - stockDTO.getQueantity() < 0) {
+            throw new RuntimeException("Cannot update stock below 0");
+        }
+        StockResponseDTO responseDTO = new StockResponseDTO();
+        responseDTO.setPreviousStock(entity.getStock());
+
+        switch (stockDTO.getOperation()) {
+            case StockOperationEnum.SUBSTRACT:
+                entity.setStock(entity.getStock() - stockDTO.getQueantity());
+                break;
+            case StockOperationEnum.ADD:
+                entity.setStock(entity.getStock() + stockDTO.getQueantity());
+                break;
+            default:
+                throw new RuntimeException("Cannot update Stock");
+        }
+
+        repository.save(entity);
+
+        responseDTO.setId(entity.getId());
+        responseDTO.setName(entity.getName());
+        responseDTO.setOperation(stockDTO.getOperation());
+        responseDTO.setQuantity(stockDTO.getQueantity());
+        responseDTO.setStock(entity.getStock());
+
+        return responseDTO;
+        
     }
 
     
