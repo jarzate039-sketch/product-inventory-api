@@ -21,5 +21,11 @@ public static class InsufficientStockException extends RuntimeException {
         super("Insufficient stock. Current: " + current + ", Attempted to subtract: " + requested);
     }
 }
+
+public static class DuplicateProductException extends RuntimeException {
+    public DuplicateProductException(String name, String category) {
+        super("Product '" + name + "' already exists in category '" + category + "'");
+    }
+}
     
 }

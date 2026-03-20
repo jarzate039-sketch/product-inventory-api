@@ -14,5 +14,7 @@ import com.hycorp.inventorySystem.entity.ProductEntity;
 public interface ProductRepository extends JpaRepository<ProductEntity, UUID>, JpaSpecificationExecutor<ProductEntity> { 
     
     public Page<ProductEntity> findByStockLessThan(Integer stock, Pageable pageable);
+
+    boolean existsByNameAndCategory(String name, String category);
     
 }

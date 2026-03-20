@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.hycorp.inventorySystem.dto.response.ErrorResponseDTO;
 import com.hycorp.inventorySystem.exceptions.CustomExceptions.DiscontinuedProductException;
+import com.hycorp.inventorySystem.exceptions.CustomExceptions.DuplicateProductException;
 import com.hycorp.inventorySystem.exceptions.CustomExceptions.InsufficientStockException;
 import com.hycorp.inventorySystem.exceptions.CustomExceptions.ProductNotFoundException;
 
@@ -45,8 +46,12 @@ public class GlobalExceptionHandler {
         .collect(Collectors.joining(", "));
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(generateErrorDTO(HttpStatus.BAD_REQUEST, message));
-}
+    }
 
+    @ExceptionHandler(DuplicateProductException.class)
+    public ResponseEntity<ErrorResponseDTO> handleValidation(DuplicateProductException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(generateErrorDTO(HttpStatus.CONFLICT, ex.getMessage()));
+    }
 
     private ErrorResponseDTO generateErrorDTO(HttpStatus status, String message){
         return ErrorResponseDTO.builder()
