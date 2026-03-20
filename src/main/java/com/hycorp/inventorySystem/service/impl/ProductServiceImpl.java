@@ -20,6 +20,7 @@ import com.hycorp.inventorySystem.dto.response.ProductStatusResponseDTO;
 import com.hycorp.inventorySystem.dto.response.StockResponseDTO;
 import com.hycorp.inventorySystem.entity.ProductEntity;
 import com.hycorp.inventorySystem.exceptions.CustomExceptions.DiscontinuedProductException;
+import com.hycorp.inventorySystem.exceptions.CustomExceptions.DuplicateProductException;
 import com.hycorp.inventorySystem.exceptions.CustomExceptions.InsufficientStockException;
 import com.hycorp.inventorySystem.exceptions.CustomExceptions.ProductNotFoundException;
 import com.hycorp.inventorySystem.repository.ProductRepository;
@@ -40,6 +41,15 @@ public class ProductServiceImpl implements ProductService{
     @Override
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
+
+        if (repository.existsByNameAndCategory(
+            productRequestDTO.getName(), 
+            productRequestDTO.getCategory())) {
+        throw new DuplicateProductException(
+            productRequestDTO.getName(), 
+            productRequestDTO.getCategory());
+        }
+
         ProductEntity entity = repository.save(modelMapper.map(productRequestDTO, ProductEntity.class));
         return modelMapper.map(entity, ProductResponseDTO.class);
     }
