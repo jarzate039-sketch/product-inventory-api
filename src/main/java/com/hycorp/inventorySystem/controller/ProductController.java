@@ -20,10 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hycorp.inventorySystem.dto.ProductRequestDTO;
-import com.hycorp.inventorySystem.dto.ProductResponseDTO;
-import com.hycorp.inventorySystem.dto.StockRequestDTO;
-import com.hycorp.inventorySystem.dto.StockResponseDTO;
+import com.hycorp.inventorySystem.dto.request.ProductRequestDTO;
+import com.hycorp.inventorySystem.dto.request.StockRequestDTO;
+import com.hycorp.inventorySystem.dto.response.ProductResponseDTO;
+import com.hycorp.inventorySystem.dto.response.ProductStatusResponseDTO;
+import com.hycorp.inventorySystem.dto.response.StockResponseDTO;
 import com.hycorp.inventorySystem.service.ProductService;
 
 import lombok.AllArgsConstructor;
@@ -55,7 +56,13 @@ public class ProductController {
             @RequestParam(name = "threshold") Integer stock,
             @PageableDefault(page = 0, size = 10) Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(service.findByLowStock(stock, pageable)); 
-    }    
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ProductStatusResponseDTO> getProductStatus(){
+        return ResponseEntity.status(HttpStatus.OK).body(service.getProductStatus());
+    }
+
 
     @PostMapping()
     public ResponseEntity<ProductResponseDTO> createProduct(@Validated @RequestBody ProductRequestDTO productDTO){

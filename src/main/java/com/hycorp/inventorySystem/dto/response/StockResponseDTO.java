@@ -1,4 +1,4 @@
-package com.hycorp.inventorySystem.dto;
+package com.hycorp.inventorySystem.dto.response;
 
 import java.util.UUID;
 

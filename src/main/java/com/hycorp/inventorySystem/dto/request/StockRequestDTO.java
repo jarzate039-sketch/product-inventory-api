@@ -1,4 +1,4 @@
-package com.hycorp.inventorySystem.dto;
+package com.hycorp.inventorySystem.dto.request;
 
 import com.hycorp.inventorySystem.constants.StockOperationEnum;
 
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class StockRequestDTO {
 
-    private Integer queantity;
+    private Integer quantity;
     private StockOperationEnum operation;
     
 }
