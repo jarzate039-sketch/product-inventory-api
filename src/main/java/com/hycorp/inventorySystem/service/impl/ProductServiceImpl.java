@@ -1,7 +1,9 @@
 package com.hycorp.inventorySystem.service.impl;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -11,11 +13,15 @@ import org.springframework.stereotype.Service;
 
 import com.hycorp.inventorySystem.constants.StatusEnum;
 import com.hycorp.inventorySystem.constants.StockOperationEnum;
-import com.hycorp.inventorySystem.dto.ProductRequestDTO;
-import com.hycorp.inventorySystem.dto.ProductResponseDTO;
-import com.hycorp.inventorySystem.dto.StockRequestDTO;
-import com.hycorp.inventorySystem.dto.StockResponseDTO;
+import com.hycorp.inventorySystem.dto.request.ProductRequestDTO;
+import com.hycorp.inventorySystem.dto.request.StockRequestDTO;
+import com.hycorp.inventorySystem.dto.response.ProductResponseDTO;
+import com.hycorp.inventorySystem.dto.response.ProductStatusResponseDTO;
+import com.hycorp.inventorySystem.dto.response.StockResponseDTO;
 import com.hycorp.inventorySystem.entity.ProductEntity;
+import com.hycorp.inventorySystem.exceptions.CustomExceptions.DiscontinuedProductException;
+import com.hycorp.inventorySystem.exceptions.CustomExceptions.InsufficientStockException;
+import com.hycorp.inventorySystem.exceptions.CustomExceptions.ProductNotFoundException;
 import com.hycorp.inventorySystem.repository.ProductRepository;
 import com.hycorp.inventorySystem.service.ProductService;
 import com.hycorp.inventorySystem.specification.ProductSpecification;
@@ -49,9 +55,7 @@ public class ProductServiceImpl implements ProductService{
     public ProductResponseDTO updateProduct(UUID id, ProductRequestDTO productRequestDTO) {
         ProductEntity entity = findProductOrThrow(id);
 
-        if(entity.getStatus() == StatusEnum.DISCONTINUED){
-            throw new RuntimeException("Cannot update a discontinued product");
-        }
+        validateNotDiscontinued(entity);
 
         entity.setName(productRequestDTO.getName());
         entity.setCategory(productRequestDTO.getCategory());
@@ -75,7 +79,13 @@ public class ProductServiceImpl implements ProductService{
     private ProductEntity findProductOrThrow(UUID id){
         return 
             repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Value not available"));
+                .orElseThrow(() -> new ProductNotFoundException(id));
+    }
+
+    private void validateNotDiscontinued(ProductEntity entity){
+        if(entity.getStatus() == StatusEnum.DISCONTINUED){
+            throw new DiscontinuedProductException();
+        }
     }
 
     @Override
@@ -99,37 +109,57 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     public StockResponseDTO updateStock(UUID id, StockRequestDTO stockDTO) {
         ProductEntity entity = findProductOrThrow(id);
+        
+        validateNotDiscontinued(entity);
 
-        if(entity.getStatus() == StatusEnum.DISCONTINUED){
-            throw new RuntimeException("Cannot update a discontinued product");
-        }
-        if (stockDTO.getOperation() == StockOperationEnum.SUBSTRACT && entity.getStock() - stockDTO.getQueantity() < 0) {
-            throw new RuntimeException("Cannot update stock below 0");
+        if (stockDTO.getOperation() == StockOperationEnum.SUBTRACT && entity.getStock() - stockDTO.getQuantity() < 0) {
+            throw new InsufficientStockException(entity.getStock(),stockDTO.getQuantity());
         }
         StockResponseDTO responseDTO = new StockResponseDTO();
         responseDTO.setPreviousStock(entity.getStock());
 
-        switch (stockDTO.getOperation()) {
-            case StockOperationEnum.SUBSTRACT:
-                entity.setStock(entity.getStock() - stockDTO.getQueantity());
-                break;
-            case StockOperationEnum.ADD:
-                entity.setStock(entity.getStock() + stockDTO.getQueantity());
-                break;
-            default:
-                throw new RuntimeException("Cannot update Stock");
-        }
+        entity.setStock(
+            switch (stockDTO.getOperation()) {
+                case ADD -> entity.getStock() + stockDTO.getQuantity();
+                case SUBTRACT -> entity.getStock() - stockDTO.getQuantity();
+        });
 
         repository.save(entity);
 
         responseDTO.setId(entity.getId());
         responseDTO.setName(entity.getName());
         responseDTO.setOperation(stockDTO.getOperation());
-        responseDTO.setQuantity(stockDTO.getQueantity());
+        responseDTO.setQuantity(stockDTO.getQuantity());
         responseDTO.setStock(entity.getStock());
 
         return responseDTO;
         
+    }
+
+    @Override
+    public ProductStatusResponseDTO getProductStatus() {
+        ProductStatusResponseDTO response = new ProductStatusResponseDTO();
+
+        List<ProductEntity> activeProducts = repository.findAll().stream()
+            .filter(p -> p.getStatus() == StatusEnum.ACTIVE).toList();
+
+        response.setLowStockProducts(
+            activeProducts.stream()
+                .filter(p -> p.getStock() < 10).count()
+        );
+        response.setTotalActiveProducts((long)activeProducts.size());
+        response.setTotalInventoryValue(
+            activeProducts.stream()
+                    .map(p -> p.getPrice().multiply(BigDecimal.valueOf(p.getStock())))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+        );
+        response.setAveragePriceByCategory(
+            activeProducts.stream()
+                .collect(Collectors.groupingBy(
+                    ProductEntity::getCategory,
+                    Collectors.averagingDouble(p -> p.getPrice().doubleValue())))
+        );
+        return response;
     }
 
     
