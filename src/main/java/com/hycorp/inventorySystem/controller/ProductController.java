@@ -58,7 +58,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(service.findByLowStock(stock, pageable)); 
     }
 
-    @GetMapping("/status")
+    @GetMapping("/stats")
     public ResponseEntity<ProductStatusResponseDTO> getProductStatus(){
         return ResponseEntity.status(HttpStatus.OK).body(service.getProductStatus());
     }
