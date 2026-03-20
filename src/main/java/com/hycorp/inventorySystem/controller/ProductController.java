@@ -1,9 +1,9 @@
 package com.hycorp.inventorySystem.controller;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -38,7 +38,7 @@ public class ProductController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<ProductResponseDTO>> getProducts(
+    public ResponseEntity<Page<ProductResponseDTO>> getProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) BigDecimal priceMin,
             @RequestParam(required = false) BigDecimal priceMax,
@@ -47,11 +47,11 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(service.getProductsByFilters(category, priceMin, priceMax, status, pageable)); 
     }
     
-    @GetMapping("low-stock")
-    public ResponseEntity<List<ProductResponseDTO>> getProductsByStock(
+    @GetMapping("/low-stock")
+    public ResponseEntity<Page<ProductResponseDTO>> getProductsByStock(
             @RequestParam(name = "threshold") Integer stock,
             @PageableDefault(page = 0, size = 10) Pageable pageable){
-        return ResponseEntity.status(HttpStatus.OK).body(service.findByStock(stock, pageable)); 
+        return ResponseEntity.status(HttpStatus.OK).body(service.findByLowStock(stock, pageable)); 
     }    
 
     @PostMapping()

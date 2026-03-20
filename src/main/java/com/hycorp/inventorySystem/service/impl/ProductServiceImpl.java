@@ -1,21 +1,21 @@
 package com.hycorp.inventorySystem.service.impl;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.hycorp.inventorySystem.config.ProductSpecification;
 import com.hycorp.inventorySystem.constants.StatusEnum;
 import com.hycorp.inventorySystem.dto.ProductRequestDTO;
 import com.hycorp.inventorySystem.dto.ProductResponseDTO;
 import com.hycorp.inventorySystem.entity.ProductEntity;
 import com.hycorp.inventorySystem.repository.ProductRepository;
 import com.hycorp.inventorySystem.service.ProductService;
+import com.hycorp.inventorySystem.specification.ProductSpecification;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -61,6 +61,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
+    @Transactional
     public void deleteProduct(UUID id) {
         ProductEntity entity = findProductOrThrow(id);
         entity.setStatus(StatusEnum.DISCONTINUED);
@@ -75,23 +76,20 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public List<ProductResponseDTO> getProductsByFilters( String category, BigDecimal priceMin, BigDecimal priceMax, String status, Pageable page) {
+    public Page<ProductResponseDTO> getProductsByFilters( String category, BigDecimal priceMin, BigDecimal priceMax, String status, Pageable page) {
         Specification<ProductEntity> spec = Specification
         .where(ProductSpecification.hasCategory(category))
         .and(ProductSpecification.hasPriceRange(priceMin, priceMax))
         .and(ProductSpecification.hasStatus(status));
 
         return repository.findAll(spec, page)
-                .stream()
-                    .map(product -> modelMapper.map(product, ProductResponseDTO.class))
-                        .toList();
+                    .map(product -> modelMapper.map(product, ProductResponseDTO.class));
     }
 
     @Override
-    public List<ProductResponseDTO> findByStock(Integer stock, Pageable pageable) {
-        return repository.findByStockLessThan(stock, pageable).stream()
-            .map(product -> modelMapper.map(product, ProductResponseDTO.class))
-                .toList();
+    public Page<ProductResponseDTO> findByLowStock(Integer stock, Pageable pageable) {
+        return repository.findByStockLessThan(stock, pageable)
+            .map(product -> modelMapper.map(product, ProductResponseDTO.class));
     }
 
     
