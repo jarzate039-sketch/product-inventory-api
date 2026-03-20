@@ -1,7 +1,11 @@
 package com.hycorp.inventorySystem.controller;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hycorp.inventorySystem.dto.ProductRequestDTO;
@@ -28,9 +33,26 @@ public class ProductController {
     ProductService service;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponseDTO> getById(@PathVariable(value = "id") String id) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.getProductByID(UUID.fromString(id)));
+    public ResponseEntity<ProductResponseDTO> getById(@PathVariable(value = "id") UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(service.getProductByID(id));
     }
+
+    @GetMapping()
+    public ResponseEntity<List<ProductResponseDTO>> getProducts(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) BigDecimal priceMin,
+            @RequestParam(required = false) BigDecimal priceMax,
+            @RequestParam(required = false) String status,
+            @PageableDefault(page = 0, size = 10) Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(service.getProductsByFilters(category, priceMin, priceMax, status, pageable)); 
+    }
+    
+    @GetMapping("low-stock")
+    public ResponseEntity<List<ProductResponseDTO>> getProductsByStock(
+            @RequestParam(name = "threshold") Integer stock,
+            @PageableDefault(page = 0, size = 10) Pageable pageable){
+        return ResponseEntity.status(HttpStatus.OK).body(service.findByStock(stock, pageable)); 
+    }    
 
     @PostMapping()
     public ResponseEntity<ProductResponseDTO> createProduct(@Validated @RequestBody ProductRequestDTO productDTO){
@@ -38,13 +60,13 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponseDTO>  updateProduct(@PathVariable(value = "id") String id, @Validated @RequestBody ProductRequestDTO productDTO){
-        return ResponseEntity.status(HttpStatus.OK).body(service.updateProduct(UUID.fromString(id), productDTO));
+    public ResponseEntity<ProductResponseDTO>  updateProduct(@PathVariable(value = "id") UUID id, @Validated @RequestBody ProductRequestDTO productDTO){
+        return ResponseEntity.status(HttpStatus.OK).body(service.updateProduct(id, productDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteProduct(@PathVariable(value = "id") String id){
-        service.deleteProduct(UUID.fromString(id));
+    public ResponseEntity<Object> deleteProduct(@PathVariable(value = "id") UUID id){
+        service.deleteProduct(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
