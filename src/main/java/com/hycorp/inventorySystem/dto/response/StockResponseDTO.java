@@ -17,7 +17,7 @@ public class StockResponseDTO {
     private UUID id;
     @Schema(description = "The name of the product", example = "Coca-Cola")
     private String name;
-    @Schema(description = "The actual stoc", example = "110")
+    @Schema(description = "The actual stock", example = "110")
     private Integer stock;
     @Schema(description = "The previous stock", example = "100")
     private Integer previousStock;
