@@ -2,7 +2,11 @@ package com.hycorp.inventorySystem.service.impl;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -18,6 +22,7 @@ import com.hycorp.inventorySystem.dto.request.StockRequestDTO;
 import com.hycorp.inventorySystem.dto.response.ProductResponseDTO;
 import com.hycorp.inventorySystem.dto.response.ProductStatusResponseDTO;
 import com.hycorp.inventorySystem.dto.response.StockResponseDTO;
+import com.hycorp.inventorySystem.dto.response.SummaryResponse;
 import com.hycorp.inventorySystem.entity.ProductEntity;
 import com.hycorp.inventorySystem.exceptions.CustomExceptions.DiscontinuedProductException;
 import com.hycorp.inventorySystem.exceptions.CustomExceptions.DuplicateProductException;
@@ -170,6 +175,32 @@ public class ProductServiceImpl implements ProductService{
                     Collectors.averagingDouble(p -> p.getPrice().doubleValue())))
         );
         return response;
+    }
+
+    @Override
+    public SummaryResponse getInventorySummary() {
+
+        AtomicLong totalActive = new AtomicLong();
+        AtomicReference<Double> totalValue = new AtomicReference<>(0.0);
+        AtomicReference<Double> avgPrice = new AtomicReference<>(0.0);
+        
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            executor.submit(() -> totalActive.set(
+            repository.countActiveProducts()));
+            executor.submit(() -> totalValue.set(
+            Optional.ofNullable(repository.sumInventoryValue()).orElse(0.0)));
+            executor.submit(() -> avgPrice.set(
+            Optional.ofNullable(repository.avgPrice()).orElse(0.0)));
+        } catch (Exception e) {
+            throw new RuntimeException("Error calculating summary", e);
+        }
+
+
+        return new SummaryResponse(
+            totalActive.get(),
+            totalValue.get(),
+            avgPrice.get()
+        );
     }
 
     
