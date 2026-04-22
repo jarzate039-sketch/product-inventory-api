@@ -25,6 +25,7 @@ import com.hycorp.inventorySystem.dto.request.StockRequestDTO;
 import com.hycorp.inventorySystem.dto.response.ProductResponseDTO;
 import com.hycorp.inventorySystem.dto.response.ProductStatusResponseDTO;
 import com.hycorp.inventorySystem.dto.response.StockResponseDTO;
+import com.hycorp.inventorySystem.dto.response.SummaryResponse;
 import com.hycorp.inventorySystem.service.ProductService;
 
 import lombok.AllArgsConstructor;
@@ -61,6 +62,11 @@ public class ProductController {
     @GetMapping("/stats")
     public ResponseEntity<ProductStatusResponseDTO> getProductStatus(){
         return ResponseEntity.status(HttpStatus.OK).body(service.getProductStatus());
+    }
+
+    @GetMapping("/summary")
+    public ResponseEntity<SummaryResponse> getInventorySummary() {
+        return ResponseEntity.ok(service.getInventorySummary());
     }
 
 

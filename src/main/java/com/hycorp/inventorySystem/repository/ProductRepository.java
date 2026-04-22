@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.hycorp.inventorySystem.entity.ProductEntity;
@@ -17,4 +18,14 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID>, J
 
     boolean existsByNameAndCategory(String name, String category);
     
+    @Query("SELECT COUNT(p) FROM ProductEntity p WHERE p.status = 'ACTIVE'")
+    long countActiveProducts();
+
+    @Query("SELECT SUM(p.price * p.stock) FROM ProductEntity p WHERE p.status = 'ACTIVE'")
+    Double sumInventoryValue();
+
+    @Query("SELECT AVG(p.price) FROM ProductEntity p WHERE p.status = 'ACTIVE'")
+    Double avgPrice();
+
+
 }

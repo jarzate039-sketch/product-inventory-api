@@ -11,6 +11,7 @@ import com.hycorp.inventorySystem.dto.request.StockRequestDTO;
 import com.hycorp.inventorySystem.dto.response.ProductResponseDTO;
 import com.hycorp.inventorySystem.dto.response.ProductStatusResponseDTO;
 import com.hycorp.inventorySystem.dto.response.StockResponseDTO;
+import com.hycorp.inventorySystem.dto.response.SummaryResponse;
 
 public interface ProductService {
 
@@ -29,5 +30,7 @@ public interface ProductService {
     public void deleteProduct(UUID id);
     
     public Page<ProductResponseDTO> findByLowStock(Integer stock, Pageable pageable);
+
+    public SummaryResponse getInventorySummary();
     
 }
